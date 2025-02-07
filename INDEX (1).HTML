@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora de Sueldos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th {
+            background-color: #2980b9;
+            color: white;
+            text-align: center;
+            padding: 12px;
+        }
+        .table td {
+            text-align: center;
+            padding: 10px;
+        }
+        .btn {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 6px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-add {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+        }
+        .btn-calculate {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+        }
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+        #resultado {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Sueldos</h1>
+
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Sueldo Base</th>
+                        <th>AFP</th>
+                        <th>ISSS</th>
+                        <th>Renta Imponible</th>
+                        <th>ISR</th>
+                        <th>Retenciones</th>
+                        <th>Sueldo Neto</th>
+                        <th>ISSS Patronal</th>
+                        <th>AFP Patronal</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCuerpo">
+                    <tr>
+                        <td><input type="text" class="form-control nombre" placeholder="Nombre"></td>
+                        <td><input type="text" class="form-control apellido" placeholder="Apellido"></td>
+                        <td><input type="number" class="form-control sueldoBase" placeholder="Sueldo Base"></td>
+                        <td class="afp">$0.00</td>
+                        <td class="isss">$0.00</td>
+                        <td class="rentaImponible">$0.00</td>
+                        <td class="isr">$0.00</td>
+                        <td class="retenciones">$0.00</td>
+                        <td class="sueldoNeto">$0.00</td>
+                        <td class="isssPatronal">$0.00</td>
+                        <td class="afpPatronal">$0.00</td>
+                        <td><button class="btn btn-delete btn-sm" onclick="eliminarFila(this)">Eliminar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="btn btn-add" onclick="agregarUsuario()">Agregar Usuario</button>
+        <button class="btn btn-calculate" onclick="calcularSueldos()">Calcular Sueldos</button>
+        <p id="resultado"></p>
+    </div>
+
+    <script>
+        function calcularSueldos() {
+            let filas = document.querySelectorAll("#tablaCuerpo tr");
+
+            filas.forEach(fila => {
+                let sueldoBase = parseFloat(fila.querySelector(".sueldoBase").value) || 0;
+
+                if (sueldoBase <= 0) {
+                    return;
+                }
+
+                // Cálculo de AFP e ISSS
+                let afp = sueldoBase * 0.0725;
+                let isss = sueldoBase * 0.03;
+
+                // Renta Imponible
+                let rentaImponible = sueldoBase - afp - isss;
+
+                // Cálculo de ISR
+                let isr = 0;
+                if (rentaImponible > 472) {
+                    if (rentaImponible <= 895.24) {
+                        isr = (rentaImponible - 472) * 0.10 + 17.67;
+                    } else if (rentaImponible <= 2038.10) {
+                        isr = (rentaImponible - 895.24) * 0.20 + 60;
+                    } else {
+                        isr = (rentaImponible - 2038.10) * 0.30 + 288.57;
+                    }
+                }
+
+                // Retenciones totales
+                let retenciones = afp + isss + isr;
+
+                // Sueldo Neto
+                let sueldoNeto = sueldoBase - retenciones;
+
+                // ISSS y AFP Patronal
+                let isssPatronal = sueldoBase * 0.075;
+                let afpPatronal = sueldoBase * 0.0875;
+
+                // Mostrar resultados en la tabla
+                fila.querySelector(".afp").innerText = `$${afp.toFixed(2)}`;
+                fila.querySelector(".isss").innerText = `$${isss.toFixed(2)}`;
+                fila.querySelector(".rentaImponible").innerText = `$${rentaImponible.toFixed(2)}`;
+                fila.querySelector(".isr").innerText = `$${isr.toFixed(2)}`;
+                fila.querySelector(".retenciones").innerText = `$${retenciones.toFixed(2)}`;
+                fila.querySelector(".sueldoNeto").innerText = `$${sueldoNeto.toFixed(2)}`;
+                fila.querySelector(".isssPatronal").innerText = `$${isssPatronal.toFixed(2)}`;
+                fila.querySelector(".afpPatronal").innerText = `$${afpPatronal.toFixed(2)}`;
+            });
+        }
+
+        function agregarUsuario() {
+            let tabla = document.getElementById("tablaCuerpo");
+            let fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td><input type="text" class="form-control nombre" placeholder="Nombre"></td>
+                <td><input type="text" class="form-control apellido" placeholder="Apellido"></td>
+                <td><input type="number" class="form-control sueldoBase" placeholder="Sueldo Base"></td>
+                <td class="afp">$0.00</td>
+                <td class="isss">$0.00</td>
+                <td class="rentaImponible">$0.00</td>
+                <td class="isr">$0.00</td>
+                <td class="retenciones">$0.00</td>
+                <td class="sueldoNeto">$0.00</td>
+                <td class="isssPatronal">$0.00</td>
+                <td class="afpPatronal">$0.00</td>
+                <td><button class="btn btn-delete btn-sm" onclick="eliminarFila(this)">Eliminar</button></td>
+            `;
+            tabla.appendChild(fila);
+        }
+
+        function eliminarFila(boton) {
+            boton.parentElement.parentElement.remove();
+        }
+    </script>
+</body>
+</html>
